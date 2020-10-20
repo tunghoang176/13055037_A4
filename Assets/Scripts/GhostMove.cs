@@ -24,8 +24,7 @@ public class GhostMove : MonoBehaviour {
 			_direction = value;
 			Vector3 pos = new Vector3((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
 			waypoint = pos + _direction;
-			//Debug.Log ("waypoint (" + waypoint.position.x + ", " + waypoint.position.y + ") set! _direction: " + _direction.x + ", " + _direction.y);
-		
+			//Debug.Log ("waypoint (" + waypoint.x + ", " + waypoint.y + ") set! _direction: " + _direction.x + ", " + _direction.y);		
 		}
 	}
 

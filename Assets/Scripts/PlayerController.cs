@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
 
     public void ResetDestination()
     {
-        _dest = new Vector2(15f, 11f);
+        _dest = new Vector2(14.5f, 12f);
         GetComponent<Animator>().SetFloat("DirX", 1);
         GetComponent<Animator>().SetFloat("DirY", 0);
     }

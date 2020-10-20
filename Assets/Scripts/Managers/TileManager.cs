@@ -37,48 +37,49 @@ public class TileManager : MonoBehaviour {
     // Update is called once per frame
 	void Update () 
 	{
-		//DrawNeighbors();
-
+		DrawNeighbors();
 	}
-	
+
 	//-----------------------------------------------------------------------
 	// hardcoded tile data: 1 = free tile, 0 = wall
+
+	int col = 28, row = 30;
+
     void ReadTiles()
     {
         // hardwired data instead of reading from file (not feasible on web player)
-        string data = @"0000000000000000000000000000
+		string data = @"0000000000000000000000000000
 0111111111111001111111111110
 0100001000001001000001000010
-0100001000001111000001000010
-0100001000001001000001000010
-0111111111111001111111111110
-0100001001000000001001000010
-0100001001000000001001000010
-0111111001111001111001111110
-0001001000001001000001001000
-0001001000001001000001001000
-0111001111111111111111001110
-0100001001000000001001000010
-0100001001000000001001000010
-0111111001000000001001111110
-0100001001000000001001000010
-0100001001000000001001000010
-0111001001111111111001001110
-0001001001000000001001001000
-0001001001000000001001001000
-0111111111111111111111111110
-0100001000001001000001000010
-0100001000001001000001000010
-0111001111111001111111001110
-0001001001000000001001001000
-0001001001000000001001001000
-0111111001111001111001111110
 0100001000001001000001000010
 0100001000001001000001000010
 0111111111111111111111111110
+0100001001000000001001000010
+0100001001000000001001000010
+0111111001111001111001111110
+0000001000001001000001000000
+0000001000001001000001000000
+0000001001111111111001000000
+0000001001000110001001000000
+0000001001011111101001000000
+0111111111011111101111111110
+0111111111011111101111111110
+0000001001011111101001000000
+0000001001000110001001000000
+0000001001111111111001000000
+0000001000001001000001000000
+0000001000001001000001000000
+0111111001111001111001111110
+0100001001000000001001000010
+0100001001000000001001000010
+0111111111111111111111111110
+0100001000001001000001000010
+0100001000001001000001000010
+0100001000001001000001000010
+0111111111111001111111111110
 0000000000000000000000000000";
 
-        int X = 1, Y = 31;
+		int X = 1, Y = row;
         using (StringReader reader = new StringReader(data))
         {
             string line;
@@ -109,9 +110,9 @@ public class TileManager : MonoBehaviour {
                     // if the current tile is not movable
                     else newTile.occupied = true;
 
-                    // check for up-down neighbor, starting from second row (Y<30)
+                    // check for up-down neighbor, starting from second row (Y<(row - 1))
                     int upNeighbor = tiles.Count - line.Length; // up neighbor index
-                    if (Y < 30 && !newTile.occupied && !tiles[upNeighbor].occupied)
+                    if (Y < (row - 1) && !newTile.occupied && !tiles[upNeighbor].occupied)
                     {
                         tiles[upNeighbor].down = newTile;
                         newTile.up = tiles[upNeighbor];
@@ -165,22 +166,22 @@ public class TileManager : MonoBehaviour {
 	{
 		// if the requsted index is in bounds
 		//Debug.Log ("Index called for X: " + X + ", Y: " + Y);
-		if(X>=1 && X<=28 && Y<=31 && Y>=1)
-			return (31-Y)*28 + X-1;
+		if(X>=1 && X<=col && Y<=row && Y>=1)
+			return (row-Y)*col + X-1;
 
 		// else, if the requested index is out of bounds
 		// return closest in-bounds tile's index 
 	    if(X<1)		X = 1;
-	    if(X>28) 	X = 28;
+	    if(X>col) 	X = col;
 	    if(Y<1)		Y = 1;
-	    if(Y>31)	Y = 31;
+	    if(Y>row)	Y = row;
 
-	    return (31-Y)*28 + X-1;
+	    return (row-Y)*col + X-1;
 	}
 	
 	public int Index(Tile tile)
 	{
-		return (31-tile.y)*28 + tile.x-1;
+		return (row-tile.y)*col + tile.x-1;
 	}
 
 	//----------------------------------------------------------------------
