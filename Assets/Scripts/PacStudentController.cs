@@ -1,17 +1,18 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PacStudentController : MonoBehaviour
 {
-    public float speed = 0.4f;
-    [SerializeField] GameObject[] pointSprites = null;
+    [SerializeField]
+    private float speed = 0.1f;
+    [SerializeField]
+    private List<PointScore> pointScores = new List<PointScore>();
 
-    Vector2 currentInput  = Vector2.zero;
+    Vector2 currentInput = Vector2.zero;
     Vector2 _dir = Vector2.zero;
     Vector2 lastInput = Vector2.zero;
-
-    public static int killstreak = 0;
 
     private bool _deadPlaying = false;
     private Animator anim;
@@ -28,13 +29,13 @@ public class PacStudentController : MonoBehaviour
 
     void Start()
     {
-        currentInput  = transform.position;
+        currentInput = transform.position;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        switch (GameManager.gameState)
+        switch (GameManager.instance.gameState)
         {
             case GameManager.GameState.Game:
                 ReadInputAndMove();
@@ -42,37 +43,38 @@ public class PacStudentController : MonoBehaviour
                 break;
             case GameManager.GameState.Dead:
                 if (!_deadPlaying)
-                    StartCoroutine("PlayDeadAnimation");
+                    StartCoroutine(PlayDeadAnimation());
                 break;
         }
     }
 
     IEnumerator PlayDeadAnimation()
     {
-        Debug.Log("Pacman Die: " + GameManager.lives);
-
+        lastInput = Vector2.zero;
         _deadPlaying = true;
         anim.SetBool("Die", true);
-        yield return new WaitForSeconds(1);
-        anim.SetBool("Die", false);
-        _deadPlaying = false;
-        lastInput = Vector2.zero;
 
-        if (GameManager.lives <= 0)
+        if (GameManager.instance.lives <= 0)
         {
-            Debug.Log("Game Over");
-            GameGUINavigation.instance.H_ShowGameOverScreen();
+            //Debug.Log("Game Over");
+            StartCoroutine(GameManager.instance.EndGame(false));
+            yield return new WaitForSeconds(1);
+            anim.speed = 0;
         }
         else
         {
-            Debug.Log("Reset Scene");
-            GameManager.instance.ResetScene();
+            //Debug.Log("Reset Scene");
+            yield return new WaitForSeconds(1);
+            anim.SetBool("Die", false);
+            _deadPlaying = false;
+            
+            StartCoroutine(GameManager.instance.ResetScene());
         }
     }
 
     void Animate()
     {
-        Vector2 dir = currentInput  - (Vector2)transform.position;
+        Vector2 dir = currentInput - (Vector2)transform.position;
         anim.SetFloat("DirX", dir.x);
         anim.SetFloat("DirY", dir.y);
     }
@@ -89,7 +91,7 @@ public class PacStudentController : MonoBehaviour
 
     public void ResetDestination()
     {
-        currentInput  = posOld;
+        currentInput = posOld;
         anim.SetFloat("DirX", 1);
         anim.SetFloat("DirY", 0);
     }
@@ -97,7 +99,7 @@ public class PacStudentController : MonoBehaviour
     void ReadInputAndMove()
     {
         // move closer to destination
-        Vector2 p = Vector2.MoveTowards(transform.position, currentInput , speed);
+        Vector2 p = Vector2.MoveTowards(transform.position, currentInput, speed);
         body.MovePosition(p);
 
         // get the next direction from keyboard
@@ -111,7 +113,7 @@ public class PacStudentController : MonoBehaviour
         {
             //if (Valid(lastInput))
             {
-                currentInput  = (Vector2)transform.position + lastInput;
+                currentInput = (Vector2)transform.position + lastInput;
                 _dir = lastInput;
                 //Debug.Log("Valid(lastInput)");
             }
@@ -119,11 +121,11 @@ public class PacStudentController : MonoBehaviour
             {
                 //if (Valid(_dir))
                 {
-            //        // and the prev. direction is valid
+                    //        // and the prev. direction is valid
                     //currentInput  = (Vector2)transform.position + _dir;   // continue on that direction
                     //Debug.Log("Valid(_dir)");
                 }
-            //    // otherwise, do nothing
+                //    // otherwise, do nothing
             }
         }
     }
@@ -133,14 +135,21 @@ public class PacStudentController : MonoBehaviour
         return _dir;
     }
 
-    public void UpdateScore()
+    public void UpdateScore(int score)
     {
-        killstreak++;
-
-        // limit killstreak at 4
-        if (killstreak > 4) killstreak = 4;
-
-        Instantiate(pointSprites[killstreak - 1], transform.position, Quaternion.identity);
-        GameManager.score += (int)Mathf.Pow(2, killstreak) * 100;
+        for (int i = 0; i < pointScores.Count; i++)
+        {
+            if(pointScores[i].score == score)
+            {
+                Instantiate(pointScores[i].sprite, transform.position, Quaternion.identity);
+            }
+        }
     }
+}
+
+[System.Serializable]
+public class PointScore
+{
+    public int score;
+    public GameObject sprite;
 }

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static int Level = 1;
-    public static int lives = 3;
+    public int lives = 3;
 
-    public enum GameState { Init, Game, Dead, Scores }
-    public static GameState gameState;
+    [SerializeField]
+    public enum GameState { Init, Game, Dead, End }
+    public GameState gameState;
 
     [SerializeField]
     private GameObject pacman = null;
@@ -20,7 +22,6 @@ public class GameManager : MonoBehaviour
     private GameObject inky = null;
     [SerializeField]
     private GameObject clyde = null;
-    private GameGUINavigation gui;
 
     private Vector3 posPacMan = new Vector3();
     private Vector3 posBlinky = new Vector3();
@@ -28,19 +29,25 @@ public class GameManager : MonoBehaviour
     private Vector3 posInky = new Vector3();
     private Vector3 posClyde = new Vector3();
 
-    public static bool scared;
-    static public int score;
-    static public int hightScore;
+    public bool scared;
+    public int score;
+    private int highScore;
+    private float timeHS;
 
     public float SpeedPerLevel;
 
     public static GameManager instance = null;
 
-    [SerializeField]
-    private float timeScare = 0f;
+    public float timeScare = 0f;
     public float timeScareAdd = 10f;
 
-    private float timeGame = 0f;
+    public float timeGame = 0f;
+
+    private float timeStart = 4f;
+    private float timeEnd = 3f;
+
+    [SerializeField]
+    private float timeSpawnCherry = 30f;
 
     void Awake()
     {
@@ -51,7 +58,8 @@ public class GameManager : MonoBehaviour
 
             SceneManager.sceneLoaded += LoadScene;
 
-            hightScore = PlayerPrefs.GetInt("HightScore", 0);
+            highScore = PlayerPrefs.GetInt("HighScore", 0);
+            timeHS = PlayerPrefs.GetFloat("TimeHS", 0);
         }
         else
         {
@@ -63,59 +71,85 @@ public class GameManager : MonoBehaviour
         AssignGhosts();
     }
 
-    void Start()
+    private void Start()
     {
-        gameState = GameState.Init;
+        gameState = GameState.Init;       
     }
 
-    void LoadScene(Scene scene, LoadSceneMode mode)
-    {
-        if (SceneManager.GetActiveScene().name == "StartScene") return;
-        AssignGhosts();
-        ResetVariables();
-
-        clyde.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
-        blinky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
-        pinky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
-        inky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
-        pacman.GetComponent<PacStudentController>().speed += Level * SpeedPerLevel / 2;
-    }
-
-    public void LoadLevel()
-    {
-        Level++;
-        SceneManager.LoadScene("RoundStart");
-    }
-
-    private void ResetVariables()
-    {
-        timeScare = 0.0f;
-        scared = false;
-        PacStudentController.killstreak = 0;
-    }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (scared && timeScare <= 0)
             CalmGhosts();
 
         if (timeScare > 0)
         {
-            timeScare -= Time.deltaTime;            
+            timeScare -= Time.deltaTime;
         }
         else timeScare = 0f;
 
-        if (GameGUINavigation.instance)
+        if (gameState == GameState.Game)
         {
-            GameGUINavigation.instance.SetGhostTimer(timeScare);
-            GameGUINavigation.instance.SetGameTimer(timeGame);
-        }
+            timeGame += Time.deltaTime;
 
-        timeGame += Time.deltaTime;
+            if(timeGame > timeSpawnCherry)
+            {
+                CherryController.instance.SpawnCherry();
+                timeSpawnCherry += timeSpawnCherry;
+            }
+        }
     }
 
-    public void ResetScene()
+    void LoadScene(Scene scene, LoadSceneMode mode)
+    {
+        switch (scene.name)
+        {
+            case "StartScene":
+                break;
+            case "RoundStart":
+                StartCoroutine(InGame());
+                break;
+            case "InnovationScene":
+                StartCoroutine(InGame());
+                break;
+        }
+    }
+
+    private IEnumerator InGame()
+    {
+        gameState = GameState.Init;
+        AssignGhosts();
+        ResetVariables();
+
+        yield return new WaitForSeconds(timeStart);               
+        gameState = GameState.Game;  
+    }
+
+    public IEnumerator EndGame(bool isWin, bool isDelay = true)
+    {
+        Debug.Log("EndGame: " + isWin);
+        gameState = GameState.End;
+        GameGUINavigation.instance.GameOver();
+        if(isDelay) yield return new WaitForSeconds(timeEnd);
+        if(score > highScore || (score == highScore && timeGame < timeHS))
+        {
+            highScore = score;
+            timeHS = timeGame;
+            
+            PlayerPrefs.SetInt("HighScore", highScore);
+            PlayerPrefs.SetFloat("TimeHS", timeHS);
+        }
+        SceneManager.LoadScene("StartScene");
+    }
+
+    private void ResetVariables()
+    {
+        timeScare = 0.0f;
+        scared = false;
+        timeSpawnCherry = 30f;
+        lives = 3;
+    }
+
+    public IEnumerator ResetScene()
     {
         CalmGhosts();
 
@@ -126,15 +160,17 @@ public class GameManager : MonoBehaviour
         clyde.transform.position = posClyde;
 
         pacman.GetComponent<PacStudentController>().ResetDestination();
-        blinky.GetComponent<GhostMove>().InitializeGhost();
-        pinky.GetComponent<GhostMove>().InitializeGhost();
-        inky.GetComponent<GhostMove>().InitializeGhost();
-        clyde.GetComponent<GhostMove>().InitializeGhost();
+        blinky.GetComponent<GhostController>().InitializeGhost();
+        pinky.GetComponent<GhostController>().InitializeGhost();
+        inky.GetComponent<GhostController>().InitializeGhost();
+        clyde.GetComponent<GhostController>().InitializeGhost();
 
         gameState = GameState.Init;
-        gui.H_ShowReadyScreen();
 
         CherryController.instance.ResetCherry();
+
+        yield return new WaitForSeconds(1f);
+        gameState = GameState.Game;
     }
 
     public void ToggleScare()
@@ -145,29 +181,27 @@ public class GameManager : MonoBehaviour
 
     public void ScareGhosts()
     {
-        Debug.Log("Ghosts Scared");
+        //Debug.Log("Ghosts Scared");
         timeScare += timeScareAdd;
 
         scared = true;
-        blinky.GetComponent<GhostMove>().Frighten();
-        pinky.GetComponent<GhostMove>().Frighten();
-        inky.GetComponent<GhostMove>().Frighten();
-        clyde.GetComponent<GhostMove>().Frighten();
+        blinky.GetComponent<GhostController>().Frighten();
+        pinky.GetComponent<GhostController>().Frighten();
+        inky.GetComponent<GhostController>().Frighten();
+        clyde.GetComponent<GhostController>().Frighten();
     }
 
     public void CalmGhosts()
     {
         scared = false;
-        blinky.GetComponent<GhostMove>().Calm();
-        pinky.GetComponent<GhostMove>().Calm();
-        inky.GetComponent<GhostMove>().Calm();
-        clyde.GetComponent<GhostMove>().Calm();
-        PacStudentController.killstreak = 0;
+        blinky.GetComponent<GhostController>().Calm();
+        pinky.GetComponent<GhostController>().Calm();
+        inky.GetComponent<GhostController>().Calm();
+        clyde.GetComponent<GhostController>().Calm();
     }
 
     void AssignGhosts()
     {
-        // find and assign ghosts
         if (clyde == null)
         {
             clyde = GameObject.Find("clyde");
@@ -193,13 +227,6 @@ public class GameManager : MonoBehaviour
             pacman = GameObject.Find("PacStudent");
             posPacMan = pacman.transform.position;
         }
-
-        if (clyde == null || pinky == null || inky == null || blinky == null) Debug.Log("One of ghosts are NULL");
-        if (pacman == null) Debug.Log("PacStudent is NULL");
-
-        gui = GameObject.FindObjectOfType<GameGUINavigation>();
-
-        if (gui == null) Debug.Log("GUI Handle Null!");
     }
 
     public void LoseLife()
@@ -207,17 +234,12 @@ public class GameManager : MonoBehaviour
         lives--;
         gameState = GameState.Dead;
 
-        // update UI too
-        UIScript ui = GameObject.FindObjectOfType<UIScript>();
-        Destroy(ui.lives[ui.lives.Count - 1]);
-        ui.lives.RemoveAt(ui.lives.Count - 1);
+        GameGUINavigation.instance.ReduLife();
     }
 
-    public static void DestroySelf()
+    public void UpdateScore(int s, bool isPrf = false)
     {
-        score = 0;
-        Level = 0;
-        lives = 3;
-        Destroy(GameObject.Find("Game Manager"));
+        if(isPrf) pacman.GetComponent<PacStudentController>().UpdateScore(s);
+        score += s;
     }
 }

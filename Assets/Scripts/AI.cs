@@ -9,7 +9,7 @@ public class AI : MonoBehaviour {
 
 	private List<TileManager.Tile> tiles = new List<TileManager.Tile>();
 	private TileManager manager;
-	public GhostMove ghost;
+	public GhostController ghost;
 
 	public TileManager.Tile nextTile = null;
 	public TileManager.Tile targetTile;

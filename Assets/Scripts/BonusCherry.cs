@@ -25,7 +25,7 @@ public class BonusCherry : MonoBehaviour
     {
         if (other.name == "PacStudent")
         {
-            GameManager.score += 100;
+            GameManager.instance.UpdateScore(100, true);
             Destroy(gameObject);
         }
     }

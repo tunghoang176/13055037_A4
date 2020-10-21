@@ -1,17 +1,15 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
-using System.Text.RegularExpressions;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class GameGUINavigation : MonoBehaviour {
 	public static GameGUINavigation instance = null;
 
-	public float initialDelay;
-
 	[SerializeField]
-	private GameObject txtReady = null;
+	private Text txtBigCDT = null;
 	[SerializeField]
 	private GameObject txtGameOver = null;
 
@@ -20,46 +18,74 @@ public class GameGUINavigation : MonoBehaviour {
 	[SerializeField]
 	private Text gameTimer = null;
 
+	[SerializeField]
+	private Text txt_score = null;
+	
+	[SerializeField]
+	private GameObject lifePfb = null;
+	[SerializeField]
+	private Transform lives = null;
+
+	private List<GameObject> lifes = new List<GameObject>();
+
 	private void Awake()
     {
 		if (instance == null) instance = this;
     }
 
-    void Start () 
+	private void Start()
 	{
-		StartCoroutine("ShowReadyScreen", initialDelay);
+		lifes.Clear();
+		foreach (Transform child in lives)
+		{
+			Destroy(child.gameObject);
+		}
+		for (int i = 0; i < GameManager.instance.lives; i++)
+		{
+			GameObject obj = Instantiate(lifePfb, lives);
+			lifes.Add(obj);
+		}
+		StartCoroutine(ShowBigCDT());
+	}
+	private void Update()
+	{
+		if (GameManager.instance.gameState == GameManager.GameState.Game)
+        {
+			SetScore(GameManager.instance.score);
+			SetGhostTimer(GameManager.instance.timeScare);
+			SetGameTimer(GameManager.instance.timeGame);
+		}
 	}
 
-	public void H_ShowReadyScreen()
-	{
-		StartCoroutine("ShowReadyScreen", initialDelay);
-	}
-
-    public void H_ShowGameOverScreen()
+	public void ReduLife()
     {
-        StartCoroutine("ShowGameOverScreen");
+		Destroy(lifes[lifes.Count - 1]);
+		lifes.RemoveAt(lifes.Count - 1);
     }
 
-	IEnumerator ShowReadyScreen(float seconds)
-	{
-		GameManager.gameState = GameManager.GameState.Init;
-		txtReady.gameObject.SetActive(true);
-		yield return new WaitForSeconds(seconds);
-		txtReady.gameObject.SetActive(false);
-		GameManager.gameState = GameManager.GameState.Game;
+	private IEnumerator ShowBigCDT()
+    {
+		txtBigCDT.gameObject.SetActive(true);
+		txtBigCDT.text = "3";		
+		yield return new WaitForSeconds(1f);
+		txtBigCDT.text = "2";
+		yield return new WaitForSeconds(1f);
+		txtBigCDT.text = "1";
+		yield return new WaitForSeconds(1f);
+		txtBigCDT.text = "GO!";
+		yield return new WaitForSeconds(1f);
+		txtBigCDT.gameObject.SetActive(false);
 	}
 
-    IEnumerator ShowGameOverScreen()
+	public void GameOver()
     {
-        Debug.Log("Showing GAME OVER Screen");
 		txtGameOver.SetActive(true);
-        yield return new WaitForSeconds(2);
-        Exit();
     }
 
 	public void Exit()
 	{
-		SceneManager.LoadScene("StartScene");
+		txtBigCDT.gameObject.SetActive(false);
+		StartCoroutine(GameManager.instance.EndGame(false, false));
 	}
 
 	private string FormatTime(float time)
@@ -70,14 +96,19 @@ public class GameGUINavigation : MonoBehaviour {
 		return string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
 	}
 
-	public void SetGhostTimer(float time)
+	private void SetScore(int score)
+    {
+		txt_score.text = "Score\n" + score;
+	}
+
+	private void SetGhostTimer(float time)
     {
 		if (time <= 0 && ghostTimer.gameObject.activeSelf) ghostTimer.gameObject.SetActive(false);
 		if (time > 0 && !ghostTimer.gameObject.activeSelf) ghostTimer.gameObject.SetActive(true);
 		ghostTimer.text = "Ghost Time: " + FormatTime(time);
 	}
 
-	public void SetGameTimer(float time)
+	private void SetGameTimer(float time)
 	{
 		gameTimer.text = "Game Time: " + FormatTime(time);
 	}

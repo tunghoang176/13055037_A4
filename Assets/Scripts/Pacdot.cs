@@ -7,13 +7,13 @@ public class Pacdot : MonoBehaviour {
 	{
 		if(other.name == "PacStudent")
 		{
-			GameManager.score += 10;
+			GameManager.instance.UpdateScore(10);
 		    GameObject[] pacdots = GameObject.FindGameObjectsWithTag("pacdot");
             Destroy(gameObject);
 
 		    if (pacdots.Length == 1)
 		    {
-		        GameManager.instance.LoadLevel();
+				StartCoroutine(GameManager.instance.EndGame(true));
 		    }
 		}
 	}

@@ -72,7 +72,7 @@
     <Compile Include="Assets\Scripts\GUI Scripts\Move.cs" />
     <Compile Include="Assets\Scripts\GUI Scripts\NameToTitle.cs" />
     <Compile Include="Assets\Scripts\GUI Scripts\PacdotSpawner.cs" />
-    <Compile Include="Assets\Scripts\GhostMove.cs" />
+    <Compile Include="Assets\Scripts\GhostController.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
     <Compile Include="Assets\Scripts\Managers\MusicManager.cs" />
     <Compile Include="Assets\Scripts\Managers\TileManager.cs" />
@@ -80,7 +80,6 @@
     <Compile Include="Assets\Scripts\Pacdot.cs" />
     <Compile Include="Assets\Scripts\Point.cs" />
     <Compile Include="Assets\Scripts\TargetGizmo.cs" />
-    <Compile Include="Assets\Scripts\UIScript.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/TH/13055037_A4/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
