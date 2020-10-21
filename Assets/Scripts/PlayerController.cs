@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
 
     public float speed = 0.4f;
-    Vector2 _dest = Vector2.zero;
+    [SerializeField]Vector2 _dest = Vector2.zero;
     Vector2 _dir = Vector2.zero;
     Vector2 _nextDir = Vector2.zero;
 
@@ -104,19 +104,23 @@ public class PlayerController : MonoBehaviour
         if (Input.GetAxis("Vertical") < 0) _nextDir = -Vector2.up;
 
         // if pacman is in the center of a tile
-        if (Vector2.Distance(_dest, transform.position) < 0.00001f)
+        //if (Vector2.Distance(_dest, transform.position) < 0.00001f)
         {
             if (Valid(_nextDir))
             {
                 _dest = (Vector2)transform.position + _nextDir;
                 _dir = _nextDir;
+                //Debug.Log("Valid(_nextDir)");
             }
             else   // if next direction is not valid
             {
-                if (Valid(_dir))  // and the prev. direction is valid
+                //if (Valid(_dir))
+                {
+            //        // and the prev. direction is valid
                     _dest = (Vector2)transform.position + _dir;   // continue on that direction
-
-                // otherwise, do nothing
+                    //Debug.Log("Valid(_dir)");
+                }
+            //    // otherwise, do nothing
             }
         }
     }

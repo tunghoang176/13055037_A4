@@ -63,7 +63,7 @@ public class GameGUINavigation : MonoBehaviour {
 
 	public void Menu()
 	{
-		SceneManager.LoadScene("menu");
+		SceneManager.LoadScene("StartScene");
 		Time.timeScale = 1.0f;
 
         // take care of game manager

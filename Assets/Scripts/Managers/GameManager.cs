@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     //--------------------------------------------------------
     // Game variables
 
-    public static int Level = 0;
+    public static int Level = 1;
     public static int lives = 3;
 
     public enum GameState { Init, Game, Dead, Scores }
@@ -79,6 +79,7 @@ public class GameManager : MonoBehaviour
                 Destroy(this.gameObject);
         }
 
+        if (SceneManager.GetActiveScene().name == "StartScene") return;
         AssignGhosts();
     }
 
@@ -89,7 +90,7 @@ public class GameManager : MonoBehaviour
 
     void LoadScene(Scene scene, LoadSceneMode mode)
     {
-        if (SceneManager.GetActiveScene().name == "menu") return;
+        if (SceneManager.GetActiveScene().name == "StartScene") return;
         AssignGhosts();
         ResetVariables();
 
@@ -103,7 +104,7 @@ public class GameManager : MonoBehaviour
     public void LoadLevel()
     {
         Level++;
-        SceneManager.LoadScene("map");
+        SceneManager.LoadScene("RoundStart");
     }
 
     private void ResetVariables()
