@@ -6,16 +6,26 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class GameGUINavigation : MonoBehaviour {
+	public static GameGUINavigation instance = null;
+
 	public float initialDelay;
 
-	[SerializeField]
-	private GameObject popupHS = null;
 	[SerializeField]
 	private GameObject txtReady = null;
 	[SerializeField]
 	private GameObject txtGameOver = null;
 
-	void Start () 
+	[SerializeField]
+	private Text ghostTimer = null;
+	[SerializeField]
+	private Text gameTimer = null;
+
+	private void Awake()
+    {
+		if (instance == null) instance = this;
+    }
+
+    void Start () 
 	{
 		StartCoroutine("ShowReadyScreen", initialDelay);
 	}
@@ -44,38 +54,31 @@ public class GameGUINavigation : MonoBehaviour {
         Debug.Log("Showing GAME OVER Screen");
 		txtGameOver.SetActive(true);
         yield return new WaitForSeconds(2);
-        Menu();
+        Exit();
     }
 
-	public void getScoresMenu()
-	{
-		Time.timeScale = 0f;		// stop the animations
-		GameManager.gameState = GameManager.GameState.Scores;
-		popupHS.gameObject.SetActive(true);
-	}
-
-	//------------------------------------------------------------------
-	// Button functions
-	public void SetTimeScale(float time)
-    {
-		Time.timeScale = time;
-    }
-
-	public void Menu()
+	public void Exit()
 	{
 		SceneManager.LoadScene("StartScene");
-		Time.timeScale = 1.0f;
-
-        // take care of game manager
-	    GameManager.DestroySelf();
 	}
 
-	public void SubmitScores()
+	private string FormatTime(float time)
 	{
-		// Check username, post to database if its good to go
-	    int highscore = GameManager.score;
-        string username = popupHS.GetComponentInChildren<InputField>().GetComponentsInChildren<Text>()[1].text;
+		int minutes = (int)time / 60;
+		int seconds = (int)time - 60 * minutes;
+		int milliseconds = (int)(1000 * (time - minutes * 60 - seconds));
+		return string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
+	}
 
-		Debug.Log("HighScore: " + username + " : " + highscore);
+	public void SetGhostTimer(float time)
+    {
+		if (time <= 0 && ghostTimer.gameObject.activeSelf) ghostTimer.gameObject.SetActive(false);
+		if (time > 0 && !ghostTimer.gameObject.activeSelf) ghostTimer.gameObject.SetActive(true);
+		ghostTimer.text = "Ghost Time: " + FormatTime(time);
+	}
+
+	public void SetGameTimer(float time)
+	{
+		gameTimer.text = "Game Time: " + FormatTime(time);
 	}
 }

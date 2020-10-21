@@ -4,10 +4,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-
-    //--------------------------------------------------------
-    // Game variables
-
     public static int Level = 1;
     public static int lives = 3;
 
@@ -36,37 +32,21 @@ public class GameManager : MonoBehaviour
     static public int score;
     static public int hightScore;
 
-    public float scareLength;
-    private float _timeToCalm;
-
     public float SpeedPerLevel;
 
-    //-------------------------------------------------------------------
-    // singleton implementation
-    private static GameManager _instance;
+    public static GameManager instance = null;
 
-    public static GameManager instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = GameObject.FindObjectOfType<GameManager>();
-                DontDestroyOnLoad(_instance.gameObject);
-            }
+    [SerializeField]
+    private float timeScare = 0f;
+    public float timeScareAdd = 10f;
 
-            return _instance;
-        }
-    }
-
-    //-------------------------------------------------------------------
-    // function definitions
+    private float timeGame = 0f;
 
     void Awake()
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this;
+            instance = this;
             DontDestroyOnLoad(this);
 
             SceneManager.sceneLoaded += LoadScene;
@@ -75,7 +55,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (this != _instance)
+            if (this != instance)
                 Destroy(this.gameObject);
         }
 
@@ -98,7 +78,7 @@ public class GameManager : MonoBehaviour
         blinky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
         pinky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
         inky.GetComponent<GhostMove>().speed += Level * SpeedPerLevel;
-        pacman.GetComponent<PlayerController>().speed += Level * SpeedPerLevel / 2;
+        pacman.GetComponent<PacStudentController>().speed += Level * SpeedPerLevel / 2;
     }
 
     public void LoadLevel()
@@ -109,16 +89,30 @@ public class GameManager : MonoBehaviour
 
     private void ResetVariables()
     {
-        _timeToCalm = 0.0f;
+        timeScare = 0.0f;
         scared = false;
-        PlayerController.killstreak = 0;
+        PacStudentController.killstreak = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (scared && _timeToCalm <= Time.time)
+        if (scared && timeScare <= 0)
             CalmGhosts();
+
+        if (timeScare > 0)
+        {
+            timeScare -= Time.deltaTime;            
+        }
+        else timeScare = 0f;
+
+        if (GameGUINavigation.instance)
+        {
+            GameGUINavigation.instance.SetGhostTimer(timeScare);
+            GameGUINavigation.instance.SetGameTimer(timeGame);
+        }
+
+        timeGame += Time.deltaTime;
     }
 
     public void ResetScene()
@@ -131,7 +125,7 @@ public class GameManager : MonoBehaviour
         inky.transform.position = posInky;
         clyde.transform.position = posClyde;
 
-        pacman.GetComponent<PlayerController>().ResetDestination();
+        pacman.GetComponent<PacStudentController>().ResetDestination();
         blinky.GetComponent<GhostMove>().InitializeGhost();
         pinky.GetComponent<GhostMove>().InitializeGhost();
         inky.GetComponent<GhostMove>().InitializeGhost();
@@ -140,6 +134,7 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Init;
         gui.H_ShowReadyScreen();
 
+        CherryController.instance.ResetCherry();
     }
 
     public void ToggleScare()
@@ -150,14 +145,14 @@ public class GameManager : MonoBehaviour
 
     public void ScareGhosts()
     {
+        Debug.Log("Ghosts Scared");
+        timeScare += timeScareAdd;
+
         scared = true;
         blinky.GetComponent<GhostMove>().Frighten();
         pinky.GetComponent<GhostMove>().Frighten();
         inky.GetComponent<GhostMove>().Frighten();
         clyde.GetComponent<GhostMove>().Frighten();
-        _timeToCalm = Time.time + scareLength;
-
-        Debug.Log("Ghosts Scared");
     }
 
     public void CalmGhosts()
@@ -167,7 +162,7 @@ public class GameManager : MonoBehaviour
         pinky.GetComponent<GhostMove>().Calm();
         inky.GetComponent<GhostMove>().Calm();
         clyde.GetComponent<GhostMove>().Calm();
-        PlayerController.killstreak = 0;
+        PacStudentController.killstreak = 0;
     }
 
     void AssignGhosts()
@@ -195,12 +190,12 @@ public class GameManager : MonoBehaviour
         }
         if (pacman == null)
         {
-            pacman = GameObject.Find("pacman");
+            pacman = GameObject.Find("PacStudent");
             posPacMan = pacman.transform.position;
         }
 
         if (clyde == null || pinky == null || inky == null || blinky == null) Debug.Log("One of ghosts are NULL");
-        if (pacman == null) Debug.Log("Pacman is NULL");
+        if (pacman == null) Debug.Log("PacStudent is NULL");
 
         gui = GameObject.FindObjectOfType<GameGUINavigation>();
 

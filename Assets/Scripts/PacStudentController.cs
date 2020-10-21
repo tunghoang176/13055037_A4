@@ -2,36 +2,33 @@
 using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour
+public class PacStudentController : MonoBehaviour
 {
-
     public float speed = 0.4f;
-    [SerializeField]Vector2 _dest = Vector2.zero;
+    [SerializeField] GameObject[] pointSprites = null;
+
+    Vector2 currentInput  = Vector2.zero;
     Vector2 _dir = Vector2.zero;
-    Vector2 _nextDir = Vector2.zero;
-
-    [Serializable]
-    public class PointSprites
-    {
-        public GameObject[] pointSprites;
-    }
-
-    public PointSprites points;
+    Vector2 lastInput = Vector2.zero;
 
     public static int killstreak = 0;
 
-    // script handles
-    private GameGUINavigation GUINav;
-    private GameManager GM;
-
     private bool _deadPlaying = false;
+    private Animator anim;
+    private Rigidbody2D body;
 
-    // Use this for initialization
+    private Vector3 posOld;
+
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+        body = GetComponent<Rigidbody2D>();
+        posOld = transform.position;
+    }
+
     void Start()
     {
-        GM = GameObject.Find("Game Manager").GetComponent<GameManager>();
-        GUINav = GameObject.Find("UI Manager").GetComponent<GameGUINavigation>();
-        _dest = transform.position;
+        currentInput  = transform.position;
     }
 
     // Update is called once per frame
@@ -43,35 +40,41 @@ public class PlayerController : MonoBehaviour
                 ReadInputAndMove();
                 Animate();
                 break;
-
             case GameManager.GameState.Dead:
                 if (!_deadPlaying)
                     StartCoroutine("PlayDeadAnimation");
                 break;
         }
-
-
     }
 
     IEnumerator PlayDeadAnimation()
     {
+        Debug.Log("Pacman Die: " + GameManager.lives);
+
         _deadPlaying = true;
-        GetComponent<Animator>().SetBool("Die", true);
+        anim.SetBool("Die", true);
         yield return new WaitForSeconds(1);
-        GetComponent<Animator>().SetBool("Die", false);
+        anim.SetBool("Die", false);
         _deadPlaying = false;
+        lastInput = Vector2.zero;
 
         if (GameManager.lives <= 0)
-            GUINav.H_ShowGameOverScreen();
+        {
+            Debug.Log("Game Over");
+            GameGUINavigation.instance.H_ShowGameOverScreen();
+        }
         else
-            GM.ResetScene();
+        {
+            Debug.Log("Reset Scene");
+            GameManager.instance.ResetScene();
+        }
     }
 
     void Animate()
     {
-        Vector2 dir = _dest - (Vector2)transform.position;
-        GetComponent<Animator>().SetFloat("DirX", dir.x);
-        GetComponent<Animator>().SetFloat("DirY", dir.y);
+        Vector2 dir = currentInput  - (Vector2)transform.position;
+        anim.SetFloat("DirX", dir.x);
+        anim.SetFloat("DirY", dir.y);
     }
 
     bool Valid(Vector2 direction)
@@ -86,38 +89,38 @@ public class PlayerController : MonoBehaviour
 
     public void ResetDestination()
     {
-        _dest = new Vector2(14.5f, 12f);
-        GetComponent<Animator>().SetFloat("DirX", 1);
-        GetComponent<Animator>().SetFloat("DirY", 0);
+        currentInput  = posOld;
+        anim.SetFloat("DirX", 1);
+        anim.SetFloat("DirY", 0);
     }
 
     void ReadInputAndMove()
     {
         // move closer to destination
-        Vector2 p = Vector2.MoveTowards(transform.position, _dest, speed);
-        GetComponent<Rigidbody2D>().MovePosition(p);
+        Vector2 p = Vector2.MoveTowards(transform.position, currentInput , speed);
+        body.MovePosition(p);
 
         // get the next direction from keyboard
-        if (Input.GetAxis("Horizontal") > 0) _nextDir = Vector2.right;
-        if (Input.GetAxis("Horizontal") < 0) _nextDir = -Vector2.right;
-        if (Input.GetAxis("Vertical") > 0) _nextDir = Vector2.up;
-        if (Input.GetAxis("Vertical") < 0) _nextDir = -Vector2.up;
+        if (Input.GetAxis("Horizontal") > 0) lastInput = Vector2.right;
+        if (Input.GetAxis("Horizontal") < 0) lastInput = -Vector2.right;
+        if (Input.GetAxis("Vertical") > 0) lastInput = Vector2.up;
+        if (Input.GetAxis("Vertical") < 0) lastInput = -Vector2.up;
 
         // if pacman is in the center of a tile
-        //if (Vector2.Distance(_dest, transform.position) < 0.00001f)
+        //if (Vector2.Distance(currentInput , transform.position) < 0.00001f)
         {
-            if (Valid(_nextDir))
+            //if (Valid(lastInput))
             {
-                _dest = (Vector2)transform.position + _nextDir;
-                _dir = _nextDir;
-                //Debug.Log("Valid(_nextDir)");
+                currentInput  = (Vector2)transform.position + lastInput;
+                _dir = lastInput;
+                //Debug.Log("Valid(lastInput)");
             }
-            else   // if next direction is not valid
+            //else   // if next direction is not valid
             {
                 //if (Valid(_dir))
                 {
             //        // and the prev. direction is valid
-                    _dest = (Vector2)transform.position + _dir;   // continue on that direction
+                    //currentInput  = (Vector2)transform.position + _dir;   // continue on that direction
                     //Debug.Log("Valid(_dir)");
                 }
             //    // otherwise, do nothing
@@ -137,8 +140,7 @@ public class PlayerController : MonoBehaviour
         // limit killstreak at 4
         if (killstreak > 4) killstreak = 4;
 
-        Instantiate(points.pointSprites[killstreak - 1], transform.position, Quaternion.identity);
+        Instantiate(pointSprites[killstreak - 1], transform.position, Quaternion.identity);
         GameManager.score += (int)Mathf.Pow(2, killstreak) * 100;
-
     }
 }

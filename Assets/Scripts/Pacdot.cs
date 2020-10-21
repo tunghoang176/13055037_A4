@@ -5,7 +5,7 @@ public class Pacdot : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		if(other.name == "pacman")
+		if(other.name == "PacStudent")
 		{
 			GameManager.score += 10;
 		    GameObject[] pacdots = GameObject.FindGameObjectsWithTag("pacdot");

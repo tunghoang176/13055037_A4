@@ -47,17 +47,13 @@ public class GhostMove : MonoBehaviour {
     private float _toggleInterval;
     private bool isWhite = false;
 
-	// handles
-	public GameGUINavigation GUINav;
-    public PlayerController pacman;
-    private GameManager _gm;
+    public PacStudentController pacman;
 
 	//-----------------------------------------------------------------------------------------
 	// variables end, functions begin
 	void Start()
 	{
-	    _gm = GameObject.Find("Game Manager").GetComponent<GameManager>();
-        _toggleInterval = _gm.scareLength * 0.33f * 0.20f;  
+        _toggleInterval = GameManager.instance.timeScareAdd * 0.33f * 0.20f;  
 		InitializeGhost();
 	}
 
@@ -103,7 +99,7 @@ public class GhostMove : MonoBehaviour {
 	    _startPos = getStartPosAccordingToName();
 		waypoint = transform.position;	// to avoid flickering animation
 		state = State.Wait;
-	    timeToEndWait = Time.time + waitLength + GUINav.initialDelay;
+	    timeToEndWait = Time.time + waitLength + GameGUINavigation.instance.initialDelay;
 		InitializeWaypoints(state);
 	}
 
@@ -112,7 +108,7 @@ public class GhostMove : MonoBehaviour {
         transform.position = pos;
         waypoint = transform.position;	// to avoid flickering animation
         state = State.Wait;
-        timeToEndWait = Time.time + waitLength + GUINav.initialDelay;
+        timeToEndWait = Time.time + waitLength + GameGUINavigation.instance.initialDelay;
         InitializeWaypoints(state);
     }
 	
@@ -292,7 +288,7 @@ public class GhostMove : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		if(other.name == "pacman")
+		if(other.name == "PacStudent")
 		{
 			//Destroy(other.gameObject);
 		    if (state == State.Run)
@@ -301,10 +297,9 @@ public class GhostMove : MonoBehaviour {
 		        InitializeGhost(_startPos);
                 pacman.UpdateScore();
 		    }
-		       
 		    else
 		    {
-		        _gm.LoseLife();
+		        GameManager.instance.LoseLife();
 		    }
 
 		}
@@ -421,7 +416,7 @@ public class GhostMove : MonoBehaviour {
 		state = State.Run;
 		_direction *= -1;
 
-        _timeToWhite = Time.time + _gm.scareLength * 0.66f;
+        _timeToWhite = Time.time + GameManager.instance.timeScareAdd * 0.66f;
         _timeToToggleWhite = _timeToWhite;
         GetComponent<Animator>().SetBool("Run_White", false);
 

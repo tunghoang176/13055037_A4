@@ -14,7 +14,7 @@ public class Energizer : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(col.name == "pacman")
+        if(col.name == "PacStudent")
         {
             gm.ScareGhosts();
             Destroy(gameObject);
