@@ -60,7 +60,7 @@ public class PacStudentController : MonoBehaviour
         if (GameManager.instance.lives <= 0)
         {
             //Debug.Log("Game Over");
-            StartCoroutine(GameManager.instance.EndGame(false));
+            GameManager.instance.EndGame(false);
             yield return new WaitForSeconds(1);
             anim.speed = 0;
         }

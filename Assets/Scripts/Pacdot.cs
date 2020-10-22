@@ -14,7 +14,7 @@ public class Pacdot : MonoBehaviour {
 
 		    if (pacdots.Length == 1)
 		    {
-				StartCoroutine(GameManager.instance.EndGame(true));
+				GameManager.instance.EndGame(true);
 		    }
 		}
 	}

@@ -85,7 +85,7 @@ public class GameGUINavigation : MonoBehaviour {
 	public void Exit()
 	{
 		txtBigCDT.gameObject.SetActive(false);
-		StartCoroutine(GameManager.instance.EndGame(false, false));
+		GameManager.instance.EndGame(false, false);
 	}
 
 	private string FormatTime(float time)

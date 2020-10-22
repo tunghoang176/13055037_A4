@@ -125,21 +125,26 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Game;  
     }
 
-    public IEnumerator EndGame(bool isWin, bool isDelay = true)
+    public void EndGame(bool isWin, bool isDelay = true)
     {
         Debug.Log("EndGame: " + isWin);
         MusicManager.instance.timeScared = 0;
         gameState = GameState.End;
         GameGUINavigation.instance.GameOver();
-        if(isDelay) yield return new WaitForSeconds(timeEnd);
-        if(score > highScore || (score == highScore && timeGame < timeHS))
+        if (score > highScore || (score == highScore && timeGame < timeHS))
         {
             highScore = score;
             timeHS = timeGame;
-            
+
             PlayerPrefs.SetInt("HighScore", highScore);
             PlayerPrefs.SetFloat("TimeHS", timeHS);
         }
+        StartCoroutine(iEndGame(isDelay));
+    }
+
+    private IEnumerator iEndGame(bool isDelay = true)
+    {
+        if (isDelay) yield return new WaitForSeconds(timeEnd);
         SceneManager.LoadScene("StartScene");
     }
 
