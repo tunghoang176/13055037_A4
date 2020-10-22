@@ -13,6 +13,7 @@ public class MusicManager : MonoBehaviour {
     private AudioSource audioSource = null;
 
     private AudioSource audioSource2 = null;
+    private AudioSource audioSource3 = null;
 
     [Header("Audio Clip")]
     [SerializeField]
@@ -27,6 +28,8 @@ public class MusicManager : MonoBehaviour {
     private AudioClip acReady = null;
     [SerializeField]
     private AudioClip acScared = null;
+    [SerializeField]
+    private AudioClip acWalk = null;
 
     private void Awake()
     {
@@ -77,7 +80,7 @@ public class MusicManager : MonoBehaviour {
         audioSource.volume = 0;
         yield return new WaitForSeconds(audioClip.length);
 
-        audioSource.volume = volume;
+        audioSource.volume = this.volume;
         if (audioSource2 != null) Destroy(audioSource2);
     }
 
@@ -118,6 +121,7 @@ public class MusicManager : MonoBehaviour {
         isMute = !isMute;
         audioSource.mute = isMute;
         if (audioSource2 != null) audioSource2.mute = isMute;
+        if (audioSource3 != null) audioSource3.mute = isMute;
     }
 
     public void ChangeVolume(float value)
@@ -125,10 +129,11 @@ public class MusicManager : MonoBehaviour {
         volume = value;
         audioSource.volume = volume;
         if (audioSource2 != null) audioSource2.volume = volume;
+        if (audioSource2 != null) audioSource3.volume = volume;
     }
     public void Ready()
     {
-        StartCoroutine(_PlayOneShotAs(acReady, 0.25f));
+        StartCoroutine(_PlayOneShotAs(acReady, 0.5f));
     }
 
     public float timeScared = 0;
@@ -179,5 +184,30 @@ public class MusicManager : MonoBehaviour {
     public void EatGhost()
     {
         PlayOneShot(acEatGhost);
+    }
+
+    public void Walk(bool isPlay)
+    {
+        if (isPlay)
+        {
+            if (audioSource3 == null)
+            {
+                audioSource3 = this.gameObject.AddComponent<AudioSource>();
+                audioSource3.clip = acWalk;
+                audioSource3.mute = isMute;
+                audioSource3.volume = volume;
+                audioSource3.loop = true;
+                audioSource3.Play();
+            }
+            else
+            {
+                if(!audioSource3.isPlaying) audioSource3.Play();
+            }
+        }
+        else
+        {
+            if (audioSource3 == null || !audioSource3.isPlaying) return;
+            audioSource3.Stop();
+        }        
     }
 }

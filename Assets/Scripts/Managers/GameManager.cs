@@ -145,7 +145,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator iEndGame(bool isDelay = true)
     {
         if (isDelay) yield return new WaitForSeconds(timeEnd);
-        SceneManager.LoadScene("StartScene");
+        SceneManager.LoadScene("StartScene");        
     }
 
     private void ResetVariables()
@@ -154,6 +154,8 @@ public class GameManager : MonoBehaviour
         scared = false;
         timeSpawnCherry = 30f;
         lives = 3;
+        timeGame = 0;
+        score = 0;
     }
 
     public IEnumerator ResetScene()

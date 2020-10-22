@@ -11,6 +11,7 @@ public class PacStudentController : MonoBehaviour
     private List<PointScore> pointScores = new List<PointScore>();
 
     Vector2 currentInput = Vector2.zero;
+    Vector2 oldP = Vector2.zero;
     Vector2 _dir = Vector2.zero;
     Vector2 lastInput = Vector2.zero;
 
@@ -19,6 +20,9 @@ public class PacStudentController : MonoBehaviour
     private bool _deadPlaying = false;
     private Animator anim;
     private Rigidbody2D body;
+
+    [SerializeField]
+    private GameObject fxWalk = null;
 
     private Vector3 posOld;
 
@@ -32,6 +36,7 @@ public class PacStudentController : MonoBehaviour
     void Start()
     {
         currentInput = transform.position;
+        oldP = Vector2.MoveTowards(transform.position, currentInput, speed);
     }
 
     // Update is called once per frame
@@ -56,6 +61,7 @@ public class PacStudentController : MonoBehaviour
         _deadPlaying = true;
         MusicManager.instance.PlayOneShot(acDeath);
         anim.SetBool("Die", true);
+        fxWalk.SetActive(false);
 
         if (GameManager.instance.lives <= 0)
         {
@@ -98,12 +104,15 @@ public class PacStudentController : MonoBehaviour
         anim.SetFloat("DirX", 1);
         anim.SetFloat("DirY", 0);
     }
-
+    
     void ReadInputAndMove()
     {
         // move closer to destination
         Vector2 p = Vector2.MoveTowards(transform.position, currentInput, speed);
         body.MovePosition(p);
+        MusicManager.instance.Walk(p != oldP);
+        fxWalk.SetActive(p != oldP);
+        oldP = p;
 
         // get the next direction from keyboard
         if (Input.GetAxis("Horizontal") > 0) lastInput = Vector2.right;
