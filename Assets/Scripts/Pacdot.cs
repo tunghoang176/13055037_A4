@@ -7,6 +7,7 @@ public class Pacdot : MonoBehaviour {
 	{
 		if(other.name == "PacStudent")
 		{
+			MusicManager.instance.EatPellet();
 			GameManager.instance.UpdateScore(10);
 		    GameObject[] pacdots = GameObject.FindGameObjectsWithTag("pacdot");
             Destroy(gameObject);

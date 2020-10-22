@@ -7,9 +7,9 @@ public class CherryController : MonoBehaviour
     public static CherryController instance = null;
 
     [SerializeField]
-    private float minY = -13.5f;
+    private float minY = 2f;
     [SerializeField]
-    private float maxY = 13.5f;
+    private float maxY = 29f;
     [SerializeField]
     private GameObject bonusCherry = null;
 
@@ -27,7 +27,7 @@ public class CherryController : MonoBehaviour
         GameObject cherry = Instantiate(bonusCherry, transform);
         cherrys.Add(cherry);
         Vector3 pos = cherry.transform.position;
-        pos.y += Random.Range(minY, maxY);
+        pos.y = Random.Range(minY, maxY);
         cherry.transform.position = pos;
     }
 

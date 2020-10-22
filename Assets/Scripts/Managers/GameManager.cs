@@ -119,6 +119,7 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Init;
         AssignGhosts();
         ResetVariables();
+        MusicManager.instance.Ready();
 
         yield return new WaitForSeconds(timeStart);               
         gameState = GameState.Game;  
@@ -127,6 +128,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator EndGame(bool isWin, bool isDelay = true)
     {
         Debug.Log("EndGame: " + isWin);
+        MusicManager.instance.timeScared = 0;
         gameState = GameState.End;
         GameGUINavigation.instance.GameOver();
         if(isDelay) yield return new WaitForSeconds(timeEnd);
@@ -181,6 +183,7 @@ public class GameManager : MonoBehaviour
 
     public void ScareGhosts()
     {
+        MusicManager.instance.Scared(timeScareAdd);
         //Debug.Log("Ghosts Scared");
         timeScare += timeScareAdd;
 

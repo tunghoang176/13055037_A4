@@ -3,20 +3,12 @@ using System.Collections;
 
 public class Energizer : MonoBehaviour {
 
-    private GameManager gm;
-
-	// Use this for initialization
-	void Start ()
-	{
-	    gm = GameObject.Find("Game Manager").GetComponent<GameManager>();
-        if( gm == null )    Debug.Log("Energizer did not find Game Manager!");
-	}
-
     void OnTriggerEnter2D(Collider2D col)
     {
         if(col.name == "PacStudent")
         {
-            gm.ScareGhosts();
+            MusicManager.instance.EatePowrPill();
+            GameManager.instance.ScareGhosts();
             Destroy(gameObject);
         }
     }

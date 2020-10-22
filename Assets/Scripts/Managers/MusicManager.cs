@@ -3,33 +3,181 @@ using System.Collections;
 
 public class MusicManager : MonoBehaviour {
 
-    private static MusicManager _instance;
+    public static MusicManager instance;
 
-    public static MusicManager instance
+    public bool isMute = false;
+    public float volume = 1;
+
+    [SerializeField]
+    private AudioClip acBackground = null;
+    private AudioSource audioSource = null;
+
+    private AudioSource audioSource2 = null;
+
+    [Header("Audio Clip")]
+    [SerializeField]
+    private AudioClip acEatPellet = null;
+    [SerializeField]
+    private AudioClip acEatPowerPill = null;
+    [SerializeField]
+    private AudioClip acEatCherry = null;
+    [SerializeField]
+    private AudioClip acEatGhost = null;
+    [SerializeField]
+    private AudioClip acReady = null;
+    [SerializeField]
+    private AudioClip acScared = null;
+
+    private void Awake()
     {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = GameObject.FindObjectOfType<MusicManager>();
-                DontDestroyOnLoad(_instance.gameObject);
-            }
+        MakeSingleInstance();
 
-            return _instance;
-        }
+        audioSource = GetComponent<AudioSource>();
+        LoadSystem();
     }
-    void Awake()
+
+    private void MakeSingleInstance()
     {
-        if (_instance == null)
+        if (instance != null)
         {
-            _instance = this;
-            DontDestroyOnLoad(this);
+            Destroy(gameObject);
         }
         else
         {
-            if (this != _instance)
-                Destroy(gameObject);
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+    }
+
+    public void PlayOneShotAs2(AudioClip audioClip, float speed = 1)
+    {
+        if (audioSource2 == null)
+        {
+            audioSource2 = this.gameObject.AddComponent<AudioSource>();
+            audioSource2.volume = volume;
+            audioSource2.mute = isMute;
         }
 
+        audioSource2.pitch = speed;
+        audioSource2.PlayOneShot(audioClip, volume);
+    }
+
+    public void PlayOneShot(AudioClip audioClip = null)
+    {
+        audioSource.PlayOneShot(audioClip, volume);
+    }
+
+    public IEnumerator _PlayOneShotAs(AudioClip audioClip = null, float volume = 1)
+    {
+        AudioSource audioSource2 = this.gameObject.AddComponent<AudioSource>();
+        audioSource2.mute = isMute;
+        audioSource2.volume = volume;
+        audioSource2.PlayOneShot(audioClip, volume);
+
+        audioSource.volume = 0;
+        yield return new WaitForSeconds(audioClip.length);
+
+        audioSource.volume = volume;
+        if (audioSource2 != null) Destroy(audioSource2);
+    }
+
+    public void PlayLoop(AudioClip audioClip = null)
+    {
+        audioSource.clip = (audioClip != null) ? audioClip : acBackground;
+
+        audioSource.Play();
+    }
+
+    public void LoadSystem()
+    {
+        audioSource.mute = isMute;
+        audioSource.volume = volume;
+
+        LoadAllElement();
+    }
+
+    public void LoadAllElement()
+    {
+        GameObject[] elements;
+        elements = GameObject.FindGameObjectsWithTag("SoundElement");
+
+        foreach (GameObject el in elements)
+        {
+            AudioSource asEl = el.GetComponent<AudioSource>();
+
+            if (asEl != null)
+            {
+                asEl.mute = isMute;
+                asEl.volume *= volume;
+            }
+        }
+    }
+
+    public void ChangeMute()
+    {
+        isMute = !isMute;
+        audioSource.mute = isMute;
+        if (audioSource2 != null) audioSource2.mute = isMute;
+    }
+
+    public void ChangeVolume(float value)
+    {
+        volume = value;
+        audioSource.volume = volume;
+        if (audioSource2 != null) audioSource2.volume = volume;
+    }
+    public void Ready()
+    {
+        StartCoroutine(_PlayOneShotAs(acReady, 0.25f));
+    }
+
+    public float timeScared = 0;
+    private AudioClip oldAc = null;
+
+    private void Update()
+    {
+        if(timeScared > 0)
+        {
+            timeScared -= Time.deltaTime;
+        }
+        else
+        {
+            timeScared = 0;
+            if (oldAc != null && audioSource.clip != oldAc)
+            {
+                audioSource.clip = oldAc;
+                audioSource.Play();
+            }
+        }
+    }
+    public void Scared(float time)
+    {
+        timeScared += time;
+        if(audioSource.clip != acScared)
+        {
+            oldAc = audioSource.clip;
+            audioSource.clip = acScared;
+            audioSource.Play();
+        }
+    }
+
+    public void EatPellet()
+    {
+        PlayOneShot(acEatPellet);
+    }
+
+    public void EatePowrPill()
+    {
+        PlayOneShot(acEatPowerPill);
+    }
+
+    public void EatCherry()
+    {
+        PlayOneShot(acEatCherry);
+    }
+
+    public void EatGhost()
+    {
+        PlayOneShot(acEatGhost);
     }
 }

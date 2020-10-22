@@ -14,6 +14,8 @@ public class PacStudentController : MonoBehaviour
     Vector2 _dir = Vector2.zero;
     Vector2 lastInput = Vector2.zero;
 
+    [SerializeField]
+    private AudioClip acDeath = null;
     private bool _deadPlaying = false;
     private Animator anim;
     private Rigidbody2D body;
@@ -52,6 +54,7 @@ public class PacStudentController : MonoBehaviour
     {
         lastInput = Vector2.zero;
         _deadPlaying = true;
+        MusicManager.instance.PlayOneShot(acDeath);
         anim.SetBool("Die", true);
 
         if (GameManager.instance.lives <= 0)
