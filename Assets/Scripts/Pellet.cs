@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Pacdot : MonoBehaviour {
+public class Pellet : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
@@ -9,7 +9,7 @@ public class Pacdot : MonoBehaviour {
 		{
 			MusicManager.instance.EatPellet();
 			GameManager.instance.UpdateScore(10);
-		    GameObject[] pacdots = GameObject.FindGameObjectsWithTag("pacdot");
+		    GameObject[] pacdots = GameObject.FindGameObjectsWithTag("pellet");
             Destroy(gameObject);
 
 		    if (pacdots.Length == 1)

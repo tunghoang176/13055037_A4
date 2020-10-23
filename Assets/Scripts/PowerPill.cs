@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Energizer : MonoBehaviour {
+public class PowerPill : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D col)
     {

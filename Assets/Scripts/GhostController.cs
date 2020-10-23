@@ -130,7 +130,7 @@ public class GhostController : MonoBehaviour
 		string data = "";
 		switch (name)
 		{
-			case "blinky":
+			case "ghost1":
 				data = @"14.5 19
 16 19
 
@@ -142,7 +142,7 @@ public class GhostController : MonoBehaviour
 27 29
 22 29";
 				break;
-			case "pinky":
+			case "ghost2":
 				data = @"13 14
 14.5 14
 14.5 12
@@ -156,7 +156,7 @@ public class GhostController : MonoBehaviour
 2 9
 7 9";
 				break;
-			case "inky":
+			case "ghost3":
 				data = @"14.5 12
 19 12
 19 14
@@ -171,7 +171,7 @@ public class GhostController : MonoBehaviour
 22 2
 27 2";
 				break;
-			case "clyde":
+			case "ghost4":
 				data = @"16 17
 14.5 17
 14.5 19
@@ -250,13 +250,13 @@ public class GhostController : MonoBehaviour
 		{
 			Vector3 pos = transform.position;
 
-			// inky and clyde start going down and then up
-			if (transform.name == "inky" || transform.name == "clyde")
+			// ghost3 and ghost4 start going down and then up
+			if (transform.name == "ghost3" || transform.name == "ghost4")
 			{
 				waypoints.Enqueue(new Vector3(pos.x, pos.y - 0.5f, 0f));
 				waypoints.Enqueue(new Vector3(pos.x, pos.y + 0.5f, 0f));
 			}
-			// while pinky start going up and then down
+			// while ghost2 start going up and then down
 			else
 			{
 				waypoints.Enqueue(new Vector3(pos.x, pos.y + 0.5f, 0f));

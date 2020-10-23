@@ -167,29 +167,25 @@ public class AI : MonoBehaviour
 		// get the target tile position (round it down to int so we can reach with Index() function)
 		switch (name)
 		{
-			case "blinky":  // target = pacman
+			case "ghost1":  // target = pacman
 				targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f);
 				targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
 				break;
-			case "pinky":   // target = pacman + 4*pacman's direction (4 steps ahead of pacman)
+			case "ghost2":   // target = pacman + 4*pacman's direction (4 steps ahead of pacman)
 				dir = target.GetComponent<PacStudentController>().getDir();
 				targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f) + 4 * dir;
-
-				// if pacmans going up, not 4 ahead but 4 up and 4 left is the target
-				// read about it here: http://gameinternals.com/post/2072558330/understanding-pac-man-ghost-behavior
-				// so subtract 4 from X coord from target position
 				if (dir == Vector3.up) targetPos -= new Vector3(4, 0, 0);
 
 				targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
 				break;
-			case "inky":    // target = ambushVector(pacman+2 - blinky) added to pacman+2
+			case "ghost3":    // target = ambushVector(pacman+2 - ghost1) added to pacman+2
 				dir = target.GetComponent<PacStudentController>().getDir();
-				Vector3 blinkyPos = GameObject.Find("blinky").transform.position;
-				Vector3 ambushVector = target.position + 2 * dir - blinkyPos;
+				Vector3 ghost1Pos = GameObject.Find("ghost1").transform.position;
+				Vector3 ambushVector = target.position + 2 * dir - ghost1Pos;
 				targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f) + 2 * dir + ambushVector;
 				targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
 				break;
-			case "clyde":
+			case "ghost4":
 				targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f);
 				targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
 				if (manager.distance(targetTile, currentTile) < 9)

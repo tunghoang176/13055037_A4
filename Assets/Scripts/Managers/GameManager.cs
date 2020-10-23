@@ -15,19 +15,19 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject pacman = null;
     [SerializeField]
-    private GameObject blinky = null;
+    private GameObject ghost1 = null;
     [SerializeField]
-    private GameObject pinky = null;
+    private GameObject ghost2 = null;
     [SerializeField]
-    private GameObject inky = null;
+    private GameObject ghost3 = null;
     [SerializeField]
-    private GameObject clyde = null;
+    private GameObject ghost4 = null;
 
     private Vector3 posPacMan = new Vector3();
-    private Vector3 posBlinky = new Vector3();
-    private Vector3 posPinky = new Vector3();
-    private Vector3 posInky = new Vector3();
-    private Vector3 posClyde = new Vector3();
+    private Vector3 posGhost1 = new Vector3();
+    private Vector3 posGhost2 = new Vector3();
+    private Vector3 posGhost3 = new Vector3();
+    private Vector3 posGhost4 = new Vector3();
 
     public bool scared;
     public int score;
@@ -163,16 +163,16 @@ public class GameManager : MonoBehaviour
         CalmGhosts();
 
         pacman.transform.position = posPacMan;
-        blinky.transform.position = posBlinky;
-        pinky.transform.position = posPinky;
-        inky.transform.position = posInky;
-        clyde.transform.position = posClyde;
+        ghost1.transform.position = posGhost1;
+        ghost2.transform.position = posGhost2;
+        ghost3.transform.position = posGhost3;
+        ghost4.transform.position = posGhost4;
 
         pacman.GetComponent<PacStudentController>().ResetDestination();
-        blinky.GetComponent<GhostController>().InitializeGhost();
-        pinky.GetComponent<GhostController>().InitializeGhost();
-        inky.GetComponent<GhostController>().InitializeGhost();
-        clyde.GetComponent<GhostController>().InitializeGhost();
+        ghost1.GetComponent<GhostController>().InitializeGhost();
+        ghost2.GetComponent<GhostController>().InitializeGhost();
+        ghost3.GetComponent<GhostController>().InitializeGhost();
+        ghost4.GetComponent<GhostController>().InitializeGhost();
 
         gameState = GameState.Init;
 
@@ -195,42 +195,42 @@ public class GameManager : MonoBehaviour
         timeScare += timeScareAdd;
 
         scared = true;
-        blinky.GetComponent<GhostController>().Frighten();
-        pinky.GetComponent<GhostController>().Frighten();
-        inky.GetComponent<GhostController>().Frighten();
-        clyde.GetComponent<GhostController>().Frighten();
+        ghost1.GetComponent<GhostController>().Frighten();
+        ghost2.GetComponent<GhostController>().Frighten();
+        ghost3.GetComponent<GhostController>().Frighten();
+        ghost4.GetComponent<GhostController>().Frighten();
     }
 
     public void CalmGhosts()
     {
         scared = false;
-        blinky.GetComponent<GhostController>().Calm();
-        pinky.GetComponent<GhostController>().Calm();
-        inky.GetComponent<GhostController>().Calm();
-        clyde.GetComponent<GhostController>().Calm();
+        ghost1.GetComponent<GhostController>().Calm();
+        ghost2.GetComponent<GhostController>().Calm();
+        ghost3.GetComponent<GhostController>().Calm();
+        ghost4.GetComponent<GhostController>().Calm();
     }
 
     void AssignGhosts()
     {
-        if (clyde == null)
+        if (ghost4 == null)
         {
-            clyde = GameObject.Find("clyde");
-            posClyde = clyde.transform.position;
+            ghost4 = GameObject.Find("ghost4");
+            posGhost4 = ghost4.transform.position;
         }
-        if (pinky == null)
+        if (ghost2 == null)
         {
-            pinky = GameObject.Find("pinky");
-            posPinky = pinky.transform.position;
+            ghost2 = GameObject.Find("ghost2");
+            posGhost2 = ghost2.transform.position;
         }
-        if (inky == null)
+        if (ghost3 == null)
         {
-            inky = GameObject.Find("inky");
-            posInky = inky.transform.position;
+            ghost3 = GameObject.Find("ghost3");
+            posGhost3 = ghost3.transform.position;
         }
-        if (blinky == null)
+        if (ghost1 == null)
         {
-            blinky = GameObject.Find("blinky");
-            posBlinky = blinky.transform.position;
+            ghost1 = GameObject.Find("ghost1");
+            posGhost1 = ghost1.transform.position;
         }
         if (pacman == null)
         {

@@ -10,10 +10,10 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private List<PointScore> pointScores = new List<PointScore>();
 
-    Vector2 currentInput = Vector2.zero;
+    public Vector2 _dest = Vector2.zero;
     Vector2 oldP = Vector2.zero;
-    Vector2 _dir = Vector2.zero;
-    Vector2 lastInput = Vector2.zero;
+    public Vector2 currentInput = Vector2.zero;
+    public Vector2 lastInput = Vector2.zero;
 
     [SerializeField]
     private AudioClip acDeath = null;
@@ -35,8 +35,8 @@ public class PacStudentController : MonoBehaviour
 
     void Start()
     {
-        currentInput = transform.position;
-        oldP = Vector2.MoveTowards(transform.position, currentInput, speed);
+        _dest = transform.position;
+        oldP = Vector2.MoveTowards(transform.position, _dest, speed);
     }
 
     // Update is called once per frame
@@ -83,7 +83,7 @@ public class PacStudentController : MonoBehaviour
 
     void Animate()
     {
-        Vector2 dir = currentInput - (Vector2)transform.position;
+        Vector2 dir = _dest - (Vector2)transform.position;
         anim.SetFloat("DirX", dir.x);
         anim.SetFloat("DirY", dir.y);
     }
@@ -95,12 +95,12 @@ public class PacStudentController : MonoBehaviour
         Vector2 pos = transform.position;
         direction += new Vector2(direction.x * 0.45f, direction.y * 0.45f);
         RaycastHit2D hit = Physics2D.Linecast(pos + direction, pos);
-        return hit.collider.name == "pacdot" || (hit.collider == GetComponent<Collider2D>());
+        return hit.collider.tag == "pellet" || hit.collider.tag == "ghost" || hit.collider == GetComponent<Collider2D>();
     }
 
     public void ResetDestination()
     {
-        currentInput = posOld;
+        _dest = posOld;
         anim.SetFloat("DirX", 1);
         anim.SetFloat("DirY", 0);
     }
@@ -108,7 +108,7 @@ public class PacStudentController : MonoBehaviour
     void ReadInputAndMove()
     {
         // move closer to destination
-        Vector2 p = Vector2.MoveTowards(transform.position, currentInput, speed);
+        Vector2 p = Vector2.MoveTowards(transform.position, _dest, speed);
         body.MovePosition(p);
         MusicManager.instance.Walk(p != oldP);
         fxWalk.SetActive(p != oldP);
@@ -121,30 +121,30 @@ public class PacStudentController : MonoBehaviour
         if (Input.GetAxis("Vertical") < 0) lastInput = -Vector2.up;
 
         // if pacman is in the center of a tile
-        //if (Vector2.Distance(currentInput , transform.position) < 0.00001f)
+        if (Vector2.Distance(_dest , transform.position) < 0.00001f)
         {
-            //if (Valid(lastInput))
+            if (Valid(lastInput))
             {
-                currentInput = (Vector2)transform.position + lastInput;
-                _dir = lastInput;
+                _dest = (Vector2)transform.position + lastInput;
+                currentInput = lastInput;
                 //Debug.Log("Valid(lastInput)");
             }
-            //else   // if next direction is not valid
+            else   // if next direction is not valid
             {
-                //if (Valid(_dir))
+                if (Valid(currentInput))
                 {
-                    //        // and the prev. direction is valid
-                    //currentInput  = (Vector2)transform.position + _dir;   // continue on that direction
-                    //Debug.Log("Valid(_dir)");
+                    // and the prev. direction is valid
+                    _dest  = (Vector2)transform.position + currentInput;   // continue on that direction
+                    //Debug.Log("Valid(currentInput)");
                 }
-                //    // otherwise, do nothing
+                // otherwise, do nothing
             }
         }
     }
 
     public Vector2 getDir()
     {
-        return _dir;
+        return currentInput;
     }
 
     public void UpdateScore(int score)
