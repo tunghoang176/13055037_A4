@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\AI.cs" />
     <Compile Include="Assets\Scripts\BonusCherry.cs" />
     <Compile Include="Assets\Scripts\CherryController.cs" />
+    <Compile Include="Assets\Scripts\Explosion.cs" />
     <Compile Include="Assets\Scripts\GUI Scripts\GameGUINavigation.cs" />
     <Compile Include="Assets\Scripts\GUI Scripts\MenuNavigation.cs" />
     <Compile Include="Assets\Scripts\GhostController.cs" />

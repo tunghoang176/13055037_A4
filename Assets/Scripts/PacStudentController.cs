@@ -10,10 +10,13 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private List<PointScore> pointScores = new List<PointScore>();
 
-    public Vector2 _dest = Vector2.zero;
+    [SerializeField]
+    private Vector2 _dest = Vector2.zero;
     Vector2 oldP = Vector2.zero;
-    public Vector2 currentInput = Vector2.zero;
-    public Vector2 lastInput = Vector2.zero;
+    [SerializeField]
+    private Vector2 currentInput = Vector2.zero;
+    [SerializeField]
+    private Vector2 lastInput = Vector2.zero;
 
     [SerializeField]
     private AudioClip acDeath = null;
@@ -23,8 +26,15 @@ public class PacStudentController : MonoBehaviour
 
     [SerializeField]
     private GameObject fxWalk = null;
+    [SerializeField]
+    private GameObject fxExplosion = null;
 
     private Vector3 posOld;
+
+    [SerializeField]
+    private bool isTeleporter = true;
+    [SerializeField]
+    private GameObject[] teleporters;
 
     private void Awake()
     {
@@ -37,6 +47,8 @@ public class PacStudentController : MonoBehaviour
     {
         _dest = transform.position;
         oldP = Vector2.MoveTowards(transform.position, _dest, speed);
+
+        teleporters = GameObject.FindGameObjectsWithTag("teleporter");
     }
 
     // Update is called once per frame
@@ -60,6 +72,7 @@ public class PacStudentController : MonoBehaviour
         lastInput = Vector2.zero;
         _deadPlaying = true;
         MusicManager.instance.PlayOneShot(acDeath);
+        Instantiate(fxExplosion, this.transform);
         anim.SetBool("Die", true);
         fxWalk.SetActive(false);
 
@@ -95,7 +108,7 @@ public class PacStudentController : MonoBehaviour
         Vector2 pos = transform.position;
         direction += new Vector2(direction.x * 0.45f, direction.y * 0.45f);
         RaycastHit2D hit = Physics2D.Linecast(pos + direction, pos);
-        return hit.collider.tag == "pellet" || hit.collider.tag == "ghost" || hit.collider == GetComponent<Collider2D>();
+        return hit.collider.tag == "pellet" || hit.collider.tag == "ghost" || (hit.collider.tag == "teleporter" && isTeleporter) || hit.collider == GetComponent<Collider2D>();
     }
 
     public void ResetDestination()
@@ -155,6 +168,36 @@ public class PacStudentController : MonoBehaviour
             {
                 Instantiate(pointScores[i].sprite, transform.position, Quaternion.identity);
             }
+        }
+    }    
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "teleporter" && isTeleporter)
+        {
+            isTeleporter = false;
+            Vector3 pos = collision.transform.position;            
+            pos.x = 29 - pos.x;
+            this.transform.position = pos;
+            _dest = (Vector2)transform.position + currentInput;
+
+            foreach (GameObject item in teleporters)
+            {
+                item.GetComponent<SpriteRenderer>().color = Color.red;
+            }
+
+            StartCoroutine(ResetTeleporter(2f));
+        }
+    }
+
+    private IEnumerator ResetTeleporter(float time)
+    {
+        yield return new WaitForSeconds(time);
+        isTeleporter = true;
+
+        foreach (GameObject item in teleporters)
+        {
+            item.GetComponent<SpriteRenderer>().color = Color.white;
         }
     }
 }
